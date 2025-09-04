@@ -27,7 +27,7 @@ jobs:
         run: npm run build
 
       - name: Run Melon Ticket Notifier
-        uses: lhsia9/melon-ticket-actions@main
+        uses: lhsia9/melon-ticket-actions@master
         with:
           product-id: "211782"
           schedule-id: "100001"

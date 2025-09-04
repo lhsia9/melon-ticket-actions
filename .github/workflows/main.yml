@@ -1,20 +1,40 @@
-name: workflow
-on: push
+name: Melon Ticket Notifier
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"  # 5분마다 자동 실행
+  workflow_dispatch:        # 수동 실행 가능
+  push:
+    branches: [ main, master ]  # push 시에도 실행
+
 jobs:
-  job:
+  notify:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
+
       - name: Prepare
         run: npm ci
+
       - name: Lint
         uses: mooyoul/tslint-actions@master
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           pattern: '*.ts'
+
       - name: Build
         run: npm run build
+
+      - name: Run Melon Ticket Notifier
+        uses: username/melon-ticket-notifier@main
+        with:
+          product-id: "211782"                            # 티켓 상품 ID
+          schedule-id: "100001"                            # 일정 ID
+          seat-id: "ALL"                                   # 모든 좌석 감시
+          slack-incoming-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}  # Slack 알림
+          message: "🎫 티켓 열렸어요!"                    # 알림 메시지
+
       - name: Publish
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: npx semantic-release
